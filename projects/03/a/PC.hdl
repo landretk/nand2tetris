@@ -16,5 +16,21 @@ CHIP PC {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    //Generate incremented
+    Inc16(in=out1, out=incIn);
+
+    //Load whenever a control bit is set
+    Or(a=load, b=inc, out=or1);
+    Or(a=or1, b=reset, out=loadReg);
+
+    Not(in=load, out=notLoad);
+    And(a=notLoad, b=inc, out=loadSel1);
+    Not(in=reset, out=notReset);
+    And(a=notReset, b=loadSel1, out=loadSel);
+
+    //Choose what to load
+    Mux16(a=in, b=false, sel=reset, out=mux1);
+    Mux16(a=mux1, b=incIn, sel=loadSel, out=regIn);
+
+    Register(in=regIn, load=loadReg, out=out, out[0..15]=out1);
 }
