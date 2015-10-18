@@ -6,10 +6,8 @@
 // Multiplies R0 and R1 and stores the result in R2.
 // (R0, R1, R2 refer to RAM[0], RAM[1], and RAM[2], respectively.)
 
-// Put your code here.
-
 	@R2
-	M=0
+	M=0 //initialize to zero
 
 	@R0
 	D=M
@@ -20,7 +18,7 @@
 	@R1_LESS_THAN_R0
 	0;JEQ
 
-(R1_LESS_THAN_R0) //load R0 into iteration counter
+(R1_LESS_THAN_R0) //load R1 into iteration counter
 	@R0
 	D=M
 	@n
@@ -47,6 +45,7 @@
 	MD=M-1
 	@END
 	D;JLT
+
 (LOOP)
 	@n
 	D=M
