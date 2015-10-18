@@ -1,2 +1,4 @@
 # nand2tetris
-Coursework for Nand To Tetris
+Coursework for Hewbrew University of Jerusalem's Nand To Tetris 
+
+[link to course](https://www.coursera.org/course/nand2tetris1)
