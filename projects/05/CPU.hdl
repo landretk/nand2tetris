@@ -38,6 +38,48 @@ CHIP CPU {
         addressM[15],    // Address in data memory (of M)
         pc[15];          // address of next instruction
 
+    // Instruction coding : o x x a c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3
+
     PARTS:
-    // Put your code here:
+    // Instruction decode
+    // o (instruction[15]) -> mux
+    Mux16(a=instruction, b=ALUOut, sel=instruction[15], out=ARegIn);
+    // not o or d1 -> Aregister load
+    Not(in=instruction[15], out=loadInstruction);
+    Or(a=loadInstruction, b=instruction[5], out=ARegLoad);
+    // a -> Choose M(1) or A(0) for ALU input
+    Mux16(a=ARegOut, b=inM, sel=instruction[12], out=ALUInY);
+    // c1-c6 -> ALU
+    ALU(x=ALUInX, y=ALUInY, zx=instruction[11], nx=instruction[10], 
+        zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6],
+        zr=ZeroFlag, ng=NegFlag, out=ALUOut, out[0..15]=outM);
+    // d2*o -> Dregister load
+    And(a=instruction[15], b=instruction[4], out=loadDReg);
+    DRegister(in=ALUOut, load=loadDReg, out=ALUInX);
+    // d3*o -> writeM
+    And(a=instruction[15], b=instruction[3], out=writeM);
+
+    // Address register, in from A-instruction or from ALU, out to addressM,
+    // ALU Y input(muxed with inM), and to program counter
+    ARegister(in=ARegIn, load=ARegLoad, out=ARegOut, out[0..14]=addressM);
+
+    // Program counter with load on jump, zero on reset
+    Not(in=doJump, out=noJump);
+    PC(in=ARegOut, reset=reset, load=doJump, inc=noJump, out[0..14]=pc);
+
+    // Jump logic
+    And(a=JumpOut, b=instruction[15], out=doJump);
+    // EQ jump on j2*zr
+    And(a=instruction[1], b=ZeroFlag, out=JumpEQ);
+    // GT jump on j3*~zr*~ng = j3*~(zr+ng)
+    Or(a=ZeroFlag, b=NegFlag, out=notGreater);
+    Not(in=notGreater, out=greaterThan);
+    And(a=instruction[0], b=greaterThan, out=JumpGT);
+    // LT jump on j1*ng
+    And(a=instruction[2], b=NegFlag, out=JumpLT);
+
+    // Combine jump conditions
+    Or(a=JumpGT, b=JumpLT, out=JumpGTLT);
+    Or(a=JumpGTLT, b=JumpEQ, out=JumpOut);
+
 }
