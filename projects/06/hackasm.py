@@ -16,13 +16,14 @@ class ASMParser(object):
                 self.dest = 'null'
                 self.jump = 'null'
                 
-                if ';' in line:
-                    self.op, self.jump = self.line.rsplit(';',1)[-2:]
-                if '=' in line:
-                    self.dest, self.op = self.line.split('=',1)[0:2]
                 if ';' in line and '=' in line:
                     self.op = re.split('[;=]',self.line)[1]
-                    
+                else:
+                    if ';' in line:
+                        self.op, self.jump = self.line.rsplit(';',1)[-2:]
+                    if '=' in line:
+                        self.dest, self.op = self.line.split('=',1)[0:2]
+
                 return str(CInstruction(self.op, self.dest, self.jump)) + '\n'
         else:
             return ''
