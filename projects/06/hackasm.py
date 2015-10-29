@@ -5,12 +5,43 @@ argv=sys.argv
 
 class ASMParser(object):
     def __init__(self):
-        ();
+        self.symbolTable = {
+                            'R0': '0',
+                            'R1': '1',
+                            'R2': '2',
+                            'R3': '3',
+                            'R4': '4',
+                            'R5': '5',
+                            'R6': '6',
+                            'R7': '7',
+                            'R8': '8',
+                            'R9': '9',
+                            'R10': '10',
+                            'R11': '11',
+                            'R12': '12',
+                            'R13': '13',
+                            'R14': '14',
+                            'R15': '15'
+                            }
     def parseLine(self, line):
         self.line = line.strip()
         if(self.line[0:2] != '//' and self.line != ''):
-            if(self.line[0] == '@'):
-                return str(AInstruction(self.line[1:])) + '\n'
+            if '//' in self.line:
+                self.line = self.line[:self.line.find('//')].strip()
+            if (self.line[0] == '('):
+                self.key = self.line[1:self.line.find(')')]
+                self.symbolTable[self.key] = 'null'
+                return self.key + " " + self.symbolTable[self.key] + '\n'
+            elif(self.line[0] == '@'):
+                if(self.line[1].isdigit()):
+                    return str(AInstruction(self.line[1:])) + '\n'
+                else:
+                    self.key = self.line[1:]
+                    if self.key not in self.symbolTable:
+                        self.symbolTable[self.key] = 'null'
+                    elif self.symbolTable[self.key].isdigit():
+                        return str(AInstruction(self.symbolTable[self.key])) + '\n'
+                    return self.symbolTable[self.key] + '\n'
             else:
                 self.op = 'null'
                 self.dest = 'null'
@@ -126,7 +157,7 @@ if __name__ == '__main__':
             f = open(asmfile,'r')
             fout = open(asmfile.replace('.asm','.hack'),'w')
             for line in f:
-                fout.write(parser.parseLine(line))
+                sys.stdout.write( parser.parseLine(line))
             
             fout.close()
             f.close()
